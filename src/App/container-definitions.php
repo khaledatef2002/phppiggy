@@ -1,0 +1,37 @@
+<?php
+
+declare(strict_types=1);
+
+use Framework\{TemplateEngine, DB, Container};
+use App\Config\Paths;
+use App\Services\{ReceiptService, TransactionService, ValidatorService, UserService};
+
+return [
+    TemplateEngine::class => fn () => new TemplateEngine(Paths::VIEW),
+    ValidatorService::class => fn () => new ValidatorService(),
+    DB::class => fn () => new DB(
+        $_ENV['DB_DRIVER'],
+        [
+            'host' => $_ENV['DB_HOST'],
+            'port' => $_ENV['DB_PORT'],
+            'dbname' => $_ENV['DB_NAME']
+        ],
+        $_ENV['DB_USER'],
+        $_ENV['DB_PASS']
+    ),
+    UserService::class => function (Container $container) {
+        $db = $container->get(DB::class);
+
+        return new UserService($db);
+    },
+    TransactionService::class => function (Container $container) {
+        $db = $container->get(DB::class);
+
+        return new TransactionService($db);
+    },
+    ReceiptService::class => function (Container $container) {
+        $db = $container->get(DB::class);
+
+        return new ReceiptService($db);
+    },
+];
